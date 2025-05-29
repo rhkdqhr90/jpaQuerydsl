@@ -2,9 +2,11 @@ package study.querydsl;
 
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -18,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import study.querydsl.dto.MemberDto;
+import study.querydsl.dto.QMemberDto;
+import study.querydsl.dto.UserDto;
 import study.querydsl.entity.Member;
 import study.querydsl.entity.QMember;
 import study.querydsl.entity.Team;
@@ -476,6 +480,82 @@ public class QueryDslBasicTest {
 
         }
 
+    @Test
+    public void findDtoByJPQL() {
+        List<MemberDto> resultList = em.createQuery("select new study.querydsl.dto.MemberDto(m.username, m.age) from Member m", MemberDto.class)
+                .getResultList();
+        resultList.forEach(System.out::println);
+    }
+    @Test
+    public void findDtoBySetter(){
+        List<MemberDto> fetch = queryFactory
+                .select(bean(MemberDto.class,
+                        member.username, member.age))
+                .from(member)
+                .fetch();
+        fetch.forEach(System.out::println);
+
+    }
+
+    @Test
+    public void findDtoByField(){
+        List<MemberDto> fetch = queryFactory
+                .select(fields(MemberDto.class,
+                        member.username, member.age))
+                .from(member)
+                .fetch();
+        fetch.forEach(System.out::println);
+    }
+
+    @Test
+    public void findDtoByConstructor(){
+        List<MemberDto> fetch = queryFactory
+                .select(constructor(MemberDto.class,
+                        member.username, member.age))
+                .from(member)
+                .fetch();
+        fetch.forEach(System.out::println);
+
+    }
+
+    @Test
+    public void findUserDto(){
+        QMember qMember = new QMember("qMember");
+        List<UserDto> fetch1 = queryFactory
+                .select(fields(UserDto.class,
+                        member.username.as("name"),
+                        ExpressionUtils.as(JPAExpressions
+                                .select(qMember.age.max())
+                                .from(qMember),"age")
+                ))
+                .from(member)
+                .fetch();
+
+        fetch1.forEach(System.out::println);
+    }
+
+    @Test
+    public void findUserDtoConstructor(){
+        List<UserDto> fetch1 = queryFactory
+                .select(constructor(UserDto.class,
+                        member.username,
+                        member.age))
+                .from(member)
+                .fetch();
+
+        fetch1.forEach(System.out::println);
+    }
+
+    @Test
+    public void findDtoByQueryProjection(){
+        List<MemberDto> fetch = queryFactory
+                .select(new QMemberDto(member.username, member.age))
+                .from(member)
+                .fetch();
+        fetch.forEach(System.out::println);
+
+
+    }
 
 
             
