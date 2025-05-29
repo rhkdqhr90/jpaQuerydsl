@@ -4,8 +4,6 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ExpressionUtils;
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
@@ -16,11 +14,12 @@ import jakarta.persistence.EntityManagerFactory;
 
 import jakarta.persistence.PersistenceUnit;
 
-import jakarta.persistence.TypedQuery;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 import study.querydsl.dto.MemberDto;
 import study.querydsl.dto.QMemberDto;
@@ -208,7 +207,7 @@ public class QueryDslBasicTest {
      * @throws Exception
      */
     @Test
-    public void group() throws Exception{
+    public void group(){
         //given
         List<Tuple> result = queryFactory
                 .select(team.name, member.age.avg())
@@ -621,6 +620,41 @@ public class QueryDslBasicTest {
     private BooleanExpression allEq(String usernameParam, Integer ageParam) {
         return getUsernameEq(usernameParam).and(ageEq(ageParam));
     }
+    
+    @Test
+    @Commit
+    public void bulkUpdate(){
+        long count = queryFactory
+                .update(member)
+                .set(member.username, "비회원")
+                .where(member.age.lt(28))
+                .execute();
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .fetch();
+        result.forEach(System.out::println);
+    }
+    @Test
+    public void bulkAdd(){
+        queryFactory
+                .update(member)
+                .set(member.age, member.age.multiply(2))
+                .execute();
+     }
+
+     @Test
+     public void bulkDelete(){
+         long execute = queryFactory
+                 .delete(member)
+                 .where(member.age.gt(18))
+                 .execute();
+
+
+     }
+
+
+
+        
 
 
 }
