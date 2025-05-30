@@ -176,7 +176,7 @@ public class QueryDslBasicTest {
                 .limit(2)
                 .fetchResults();
 
-        assertThat(result.getTotal()).isEqualTo(4);
+        assertThat(result.getTotal()).isEqualTo(8);
         assertThat(result.getResults().size()).isEqualTo(2);
         assertThat(result.getOffset()).isEqualTo(1);
     }
@@ -195,8 +195,8 @@ public class QueryDslBasicTest {
                 .fetch();
 
         Tuple tuple = result.get(0);
-        assertThat(tuple.get(member.username.count())).isEqualTo(4L);
-        assertThat(tuple.get(member.age.sum())).isEqualTo(100L);
+        assertThat(tuple.get(member.username.count())).isEqualTo(8L);
+        assertThat(tuple.get(member.age.sum())).isEqualTo(200L);
         assertThat(tuple.get(member.age.avg())).isEqualTo(25.0);
         assertThat(tuple.get(member.age.max())).isEqualTo(40);
         assertThat(tuple.get(member.age.min())).isEqualTo(10);
@@ -243,7 +243,7 @@ public class QueryDslBasicTest {
         //when
         assertThat(result)
                 .extracting("username")
-                .containsExactly("member1", "member2");
+                .containsExactly("비회원","비회원","member1", "member2");
 
          //then
       }
@@ -373,7 +373,7 @@ public class QueryDslBasicTest {
                 ))
                 .fetch();
         //when
-        assertThat(result).extracting("age").containsExactly(30,40);
+        assertThat(result).extracting("age").containsExactly(30,40,30,40);
         //then
     }
 
@@ -393,7 +393,7 @@ public class QueryDslBasicTest {
                 ))
                 .fetch();
         //when
-        assertThat(result).extracting("age").containsExactly(20,30,40);
+        assertThat(result).extracting("age").containsExactly(20,30,40,20,30,40);
         //then
     }
     @Test
@@ -402,7 +402,7 @@ public class QueryDslBasicTest {
         QMember memberSub= new QMember("memberSub");
         //when
         queryFactory
-                .select(memberSub.username,
+                .select(member.username,
                         select(memberSub.age.avg())
                                 .from(memberSub))
                 .from(member)
@@ -671,9 +671,9 @@ public class QueryDslBasicTest {
 
 
          fetch.forEach(System.out::println);
-
-
      }
+
+
 
 
 
